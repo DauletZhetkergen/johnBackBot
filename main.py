@@ -24,7 +24,7 @@ PAYMENT = config["BASIC"]["PAYMENT"]
 
 
 bot = Bot(TOKEN)
-dp = Dispatcher(bot,storage=MemoryStorage)
+dp = Dispatcher(bot,storage=MemoryStorage())
 
 dict_messages = {
     "welcome":"Welcome message here",
@@ -50,10 +50,16 @@ async def invoice(message: types.Message):
                            [types.LabeledPrice("Order",int(orderData["price"])*100)],
                            )
 
+@dp.pre_checkout_query_handler(lambda query: True)
+async def pre_checkout_query(pre_checkout_q: types.PreCheckoutQuery):
+    await bot.answer_pre_checkout_query(pre_checkout_q.id, ok=True)
 
+admins = [5607418450,748788690]
 @dp.message_handler(content_types=types.ContentType.SUCCESSFUL_PAYMENT, state='*')
 async def succesPay(message: types.Message):
     print(message.successful_payment.order_info)
+    for admin in admins:
+        await bot.send_message(admin,"New order details will be below ")
 
 
 
